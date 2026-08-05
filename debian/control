@@ -1,13 +1,15 @@
 Source: lnetd
-Section: unknown
-Priority: extra
-Maintainer: root <elric@imrryr.org>
-Build-Depends: debhelper (>= 7)
-Standards-Version: 3.8.3
-Homepage: <insert the upstream URL, if relevant>
+Section: net
+Priority: optional
+Maintainer: Roland C. Dowdeswell <elric@imrryr.org>
+Build-Depends: debhelper-compat (= 13), groff-base, python3
+Standards-Version: 4.7.0
+Rules-Requires-Root: no
+Homepage: https://github.com/ChapelTech/lnetd
 
 Package: lnetd
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Description: lightweight inetd-style UNIX socket listener
+ lnetd listens on a UNIX domain socket and starts a child process for each
+ connection, in the same manner as inetd.

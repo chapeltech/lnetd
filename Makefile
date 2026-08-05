@@ -18,6 +18,9 @@ NROFF	?= nroff
 
 all: lnetd lnetd.0
 
+check: lnetd
+	./tests/smoke.sh
+
 clean:
 	rm -f lnetd lnetd.o lnetd.0
 
@@ -31,3 +34,5 @@ install:
 
 lnetd.0: lnetd.8
 	$(NROFF) -mandoc lnetd.8 > $@
+
+.PHONY: all check clean install

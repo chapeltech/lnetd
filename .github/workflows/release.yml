@@ -1,0 +1,75 @@
+name: Release packages
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  debian:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential debhelper groff-base python3
+      - name: Build Debian package
+        run: |
+          dpkg-buildpackage -us -uc -b
+          mkdir dist
+          cp ../*.deb dist/
+      - uses: actions/upload-artifact@v7
+        with:
+          name: debian-packages
+          path: dist/*.deb
+          if-no-files-found: error
+
+  rpm:
+    runs-on: ubuntu-latest
+    container: rockylinux:9
+    steps:
+      - name: Install dependencies
+        run: dnf install -y gcc git gzip make groff-base python3 rpm-build
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
+      - name: Build RPM packages
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          version=$(rpm -q --specfile packaging/rpm/lnetd.spec \
+              --qf '%{version}\n' | head -1)
+          mkdir -p "$HOME"/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+          git archive --format=tar --prefix="lnetd-$version/" HEAD |
+              gzip -n >"$HOME/rpmbuild/SOURCES/lnetd-$version.tar.gz"
+          cp packaging/rpm/lnetd.spec "$HOME/rpmbuild/SPECS/"
+          rpmbuild -ba "$HOME/rpmbuild/SPECS/lnetd.spec"
+          mkdir dist
+          find "$HOME/rpmbuild/RPMS" "$HOME/rpmbuild/SRPMS" \
+              -type f -name '*.rpm' -exec cp {} dist/ \;
+      - uses: actions/upload-artifact@v7
+        with:
+          name: rpm-packages
+          path: dist/*.rpm
+          if-no-files-found: error
+
+  publish:
+    needs: [debian, rpm]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$RELEASE_TAG" dist/* --clobber

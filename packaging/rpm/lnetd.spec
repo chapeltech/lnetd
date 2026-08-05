@@ -3,12 +3,13 @@ Version:        0.2
 Release:        1%{?dist}
 Summary:        Lightweight inetd-style listener
 License:        MIT
-URL:            https://github.com/elric1/lnetd
+URL:            https://github.com/ChapelTech/lnetd
 Source0:        lnetd-%{version}.tar.gz
 
 BuildRequires:  gcc
 BuildRequires:  make
 BuildRequires:  groff-base
+BuildRequires:  python3
 
 %description
 lnetd is a small inetd-style network listener.
@@ -18,6 +19,9 @@ lnetd is a small inetd-style network listener.
 
 %build
 %make_build CFLAGS="%{optflags}" NROFF=/usr/bin/nroff
+
+%check
+%make_build check
 
 %install
 install -Dpm0755 lnetd %{buildroot}%{_sbindir}/lnetd
