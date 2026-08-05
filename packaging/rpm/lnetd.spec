@@ -1,6 +1,6 @@
 Name:           lnetd
 Version:        0.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Lightweight inetd-style listener
 License:        MIT
 URL:            https://github.com/ChapelTech/lnetd
@@ -10,6 +10,7 @@ BuildRequires:  gcc
 BuildRequires:  make
 BuildRequires:  groff-base
 BuildRequires:  python3
+BuildRequires:  util-linux
 
 %description
 lnetd is a small inetd-style network listener.
@@ -33,5 +34,8 @@ install -Dpm0644 lnetd.8 %{buildroot}%{_mandir}/man8/lnetd.8
 %{_mandir}/man8/lnetd.8*
 
 %changelog
+* Wed Aug 05 2026 ChapelTech <packages@chapel.tech> - 0.2-2
+- Rebuild for Debian 13 and add signed EL9 release automation.
+
 * Wed Aug 05 2026 ChapelTech <packages@chapel.tech> - 0.2-1
 - Add Rocky/RHEL packaging.

@@ -1,3 +1,11 @@
+lnetd (0.2-2) trixie; urgency=medium
+
+  * Rebuild for Debian 13 on amd64 and arm64.
+  * Install the manual page in the policy-compliant location.
+  * Add signed EL9 packages and package repository publication hooks.
+
+ -- ChapelTech <packages@chapel.tech>  Wed, 05 Aug 2026 00:00:00 +0100
+
 lnetd (0.2) unstable; urgency=low
 
   * Fix creation umask

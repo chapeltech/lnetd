@@ -11,3 +11,7 @@
 
 %:
 	dh  $@
+
+override_dh_auto_install:
+	install -Dpm0755 lnetd debian/lnetd/usr/sbin/lnetd
+	install -Dpm0644 lnetd.8 debian/lnetd/usr/share/man/man8/lnetd.8
