@@ -1,5 +1,5 @@
 Name:           lnetd
-Version:        0.2
+Version:        0.3
 Release:        2%{?dist}
 Summary:        Lightweight inetd-style listener
 License:        MIT
@@ -34,6 +34,9 @@ install -Dpm0644 lnetd.8 %{buildroot}%{_mandir}/man8/lnetd.8
 %{_mandir}/man8/lnetd.8*
 
 %changelog
+* Thu Aug 06 2026 ChapelTech <packages@chapel.tech> - 0.3-2
+- Release 0.3 with Debian, EL9, and Alpine package automation.
+
 * Wed Aug 05 2026 ChapelTech <packages@chapel.tech> - 0.2-2
 - Rebuild for Debian 13 and add signed EL9 release automation.
 

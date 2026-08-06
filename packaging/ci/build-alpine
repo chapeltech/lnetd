@@ -66,6 +66,7 @@ git -C "$SOURCE_DIR" archive --format=tar \
 	--prefix="$package_name-$package_version/" "$tag_commit" \
 	>"$package_dir/$package_name-$package_version.tar"
 
+HOME="$abuild_home" abuild -F -C "$package_dir" checksum
 apkbuild-lint "$package_dir/APKBUILD"
 if [ -n "${PACKAGER_PRIVKEY:-}" ]; then
 	test -f "$PACKAGER_PRIVKEY"
