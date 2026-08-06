@@ -1,0 +1,33 @@
+# Maintainer: ChapelTech <packages@chapel.tech>
+pkgname=lnetd
+pkgver=0.2
+pkgrel=0
+pkgdesc="Lightweight inetd-style UNIX socket listener"
+url="https://github.com/ChapelTech/lnetd"
+arch="all"
+license="MIT"
+makedepends="groff"
+checkdepends="python3 util-linux-misc"
+subpackages="$pkgname-doc"
+source="$pkgname-$pkgver.tar"
+
+build() {
+	make \
+		CFLAGS="$CFLAGS" \
+		CPPFLAGS="$CPPFLAGS" \
+		LDFLAGS="$LDFLAGS" \
+		NROFF=/usr/bin/nroff
+}
+
+check() {
+	make check
+}
+
+package() {
+	install -Dm755 lnetd "$pkgdir/usr/sbin/lnetd"
+	install -Dm644 lnetd.8 "$pkgdir/usr/share/man/man8/lnetd.8"
+}
+
+sha512sums="
+c2ac72c1f8042b64181f9266c250d14f96530a388fb7422b32316137e1323ffdc680fa9363a8d003b0cfedb82690c1d8c740cc38151aa277dcb05a1609d58eed  lnetd-0.2.tar
+"
