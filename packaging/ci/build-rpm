@@ -1,0 +1,56 @@
+#!/bin/sh
+
+set -eu
+
+: "${RELEASE_TAG:?RELEASE_TAG must be set}"
+: "${TARGET_ARCHITECTURE:?TARGET_ARCHITECTURE must be set}"
+: "${SOURCE_DIR:?SOURCE_DIR must be set}"
+: "${PACKAGING_DIR:?PACKAGING_DIR must be set}"
+: "${ARTIFACT_DIR:?ARTIFACT_DIR must be set}"
+
+dnf install -y \
+	gcc gzip make groff-base python3 rpm-build util-linux
+
+test "$TARGET_ARCHITECTURE" = x86_64
+test "$(uname -m)" = x86_64
+test "$(rpm --eval '%{_arch}')" = x86_64
+git config --global --add safe.directory "$SOURCE_DIR"
+tag_commit=$(git -C "$SOURCE_DIR" rev-parse --verify \
+	"refs/tags/$RELEASE_TAG^{commit}")
+test "$(git -C "$SOURCE_DIR" rev-parse --verify 'HEAD^{commit}')" = \
+	"$tag_commit"
+
+spec=$PACKAGING_DIR/packaging/rpm/lnetd.spec
+version=$(rpm -q --specfile "$spec" --qf '%{version}\n' | head -1)
+revision=$(rpm -q --specfile "$spec" --qf '%{release}\n' | head -1)
+test "${RELEASE_TAG#v}" = "$version"
+test "${revision%%.*}" = 2
+
+build_dir=$(mktemp -d)
+cleanup()
+{
+	rm -rf "$build_dir"
+}
+trap cleanup EXIT HUP INT TERM
+
+topdir=$build_dir/rpmbuild
+mkdir -p "$topdir"/BUILD "$topdir"/BUILDROOT "$topdir"/RPMS \
+	"$topdir"/SOURCES "$topdir"/SPECS "$topdir"/SRPMS
+git -C "$SOURCE_DIR" archive --format=tar --prefix="lnetd-$version/" \
+	"$tag_commit" | gzip -n >"$topdir/SOURCES/lnetd-$version.tar.gz"
+cp "$spec" "$topdir/SPECS/"
+rpmbuild -ba --define "_topdir $topdir" "$topdir/SPECS/lnetd.spec"
+
+mkdir -p "$ARTIFACT_DIR"
+found=false
+for package in "$topdir"/RPMS/*/*.rpm "$topdir"/SRPMS/*.rpm; do
+	[ -f "$package" ] || continue
+	found=true
+	architecture=$(rpm -qp --qf '%{arch}\n' "$package")
+	case "$architecture" in
+		x86_64|noarch|src) ;;
+		*) exit 1 ;;
+	esac
+	cp "$package" "$ARTIFACT_DIR/"
+done
+test "$found" = true
